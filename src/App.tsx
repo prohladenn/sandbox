@@ -73,10 +73,10 @@ function App() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: activeTab === "map" ? "hidden" : "auto", minHeight: 0 }}>
+      <div style={{ flex: 1, overflowY: activeTab === "map" ? "hidden" : "auto", minHeight: 0, display: "flex", flexDirection: "column" }}>
         {activeTab === "map" && (
-          <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-            <div style={{ flex: 1, overflow: "hidden" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
               <WorldMap
                 visitedCodes={visited}
                 onCountryClick={handleMapClick}
