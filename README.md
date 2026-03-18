@@ -2,6 +2,8 @@
 
 A Telegram Mini App that lets you track countries you've visited, with an interactive world map, searchable country list, and statistics.
 
+**🔗 Live demo:** https://prohladenn.github.io/sandbox/
+
 ## Features
 
 - **🗺️ Interactive World Map** — Tap any country to mark it as visited (highlighted in blue). Supports pinch-to-zoom and pan.
@@ -53,4 +55,15 @@ npm run preview  # Preview production build
 
 ## Deployment
 
-Build the app and host it on any static hosting (Vercel, Netlify, GitHub Pages, etc.). Then configure your Telegram Bot to use the hosted URL as the Mini App URL.
+### GitHub Pages (automated)
+
+The app is automatically deployed to **https://prohladenn.github.io/sandbox/** on every push to `main` via the `.github/workflows/deploy.yml` GitHub Actions workflow.
+
+To enable it in your fork:
+1. Go to **Settings → Pages**
+2. Set **Source** to **GitHub Actions**
+3. Push to `main` — the workflow will build and deploy automatically
+
+### Other hosting
+
+Build with `npm run build` and deploy the `dist/` folder to any static host (Vercel, Netlify, etc.). Update `base` in `vite.config.ts` if serving from a subpath other than `/sandbox/`.
