@@ -27,10 +27,10 @@ export function WorldMap({
   hoverColor,
 }: WorldMapProps) {
   return (
-    <div style={{ width: "100%", height: "100%", background: "transparent" }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "transparent" }}>
       <ComposableMap
         projection="geoNaturalEarth1"
-        style={{ width: "100%", height: "100%" }}
+        style={{ flex: 1, width: "100%" }}
       >
         <ZoomableGroup zoom={1} minZoom={0.8} maxZoom={6}>
           <Geographies geography={GEO_URL}>

@@ -116,7 +116,7 @@ export function CountrySearch({
   };
 
   return (
-    <div style={{ padding: "12px 12px 12px" }}>
+    <div style={{ padding: "12px 12px 12px", flexShrink: 0 }}>
       <input
         type="text"
         placeholder="Search countries..."
