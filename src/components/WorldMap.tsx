@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -15,12 +15,6 @@ const MAP_HEIGHT = 600;
 
 const DEFAULT_CENTER: [number, number] = [0, 0];
 const DEFAULT_ZOOM = 1;
-
-// When the zoom level is below this threshold the full (or nearly full) world
-// map is visible on screen. Panning at this zoom causes empty black areas, so
-// we animate the map back to centre after the user lifts their finger.
-const SNAP_BACK_ZOOM_THRESHOLD = 1.5;
-const SNAP_BACK_DURATION_MS = 400;
 
 interface MapPosition {
   center: [number, number];
@@ -54,71 +48,24 @@ export function WorldMap({
     zoom: DEFAULT_ZOOM,
   });
 
-  const snapAnimRef = useRef<number | null>(null);
-
-  const cancelSnap = useCallback(() => {
-    if (snapAnimRef.current !== null) {
-      cancelAnimationFrame(snapAnimRef.current);
-      snapAnimRef.current = null;
-    }
+  const handleMoveEnd = useCallback(({ coordinates, zoom }: MoveEvent) => {
+    setPosition({ center: coordinates, zoom });
   }, []);
 
-  const handleMoveStart = useCallback(() => {
-    // Cancel any ongoing snap-back animation when a new gesture begins
-    cancelSnap();
-  }, [cancelSnap]);
-
-  const handleMoveEnd = useCallback(
-    ({ coordinates, zoom }: MoveEvent) => {
-      cancelSnap();
-
-      if (zoom < SNAP_BACK_ZOOM_THRESHOLD) {
-        // Animate the map centre back to [0, 0] so the screen is never empty
-        const startCoords = coordinates;
-        const startTime = performance.now();
-
-        const animate = (now: number) => {
-          const elapsed = now - startTime;
-          const t = Math.min(elapsed / SNAP_BACK_DURATION_MS, 1);
-          // Ease-out cubic: decelerates towards the target
-          const eased = 1 - Math.pow(1 - t, 3);
-
-          const current: [number, number] = [
-            startCoords[0] * (1 - eased),
-            startCoords[1] * (1 - eased),
-          ];
-
-          setPosition({ center: current, zoom });
-
-          if (t < 1) {
-            snapAnimRef.current = requestAnimationFrame(animate);
-          } else {
-            snapAnimRef.current = null;
-          }
-        };
-
-        snapAnimRef.current = requestAnimationFrame(animate);
-      } else {
-        setPosition({ center: coordinates, zoom });
-      }
-    },
-    [cancelSnap],
-  );
-
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "transparent" }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <ComposableMap
         projection="geoNaturalEarth1"
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        style={{ flex: 1, width: "100%" }}
+        preserveAspectRatio="xMidYMid slice"
+        style={{ flex: 1, width: "100%", height: "100%" }}
       >
         <ZoomableGroup
           center={position.center}
           zoom={position.zoom}
-          minZoom={0.8}
+          minZoom={1}
           maxZoom={6}
-          onMoveStart={handleMoveStart}
           onMoveEnd={handleMoveEnd}
         >
           <Geographies geography={GEO_URL}>
