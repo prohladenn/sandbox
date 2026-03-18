@@ -116,7 +116,7 @@ export function CountrySearch({
   };
 
   return (
-    <div style={{ padding: "0 12px 12px" }}>
+    <div style={{ padding: "12px 12px 12px" }}>
       <input
         type="text"
         placeholder="Search countries..."
@@ -177,7 +177,7 @@ export function CountrySearch({
         {filtered.length} countries
       </div>
 
-      <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 280px)" }}>
+      <div>
         {filtered.map(renderCountry)}
       </div>
     </div>

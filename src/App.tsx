@@ -44,7 +44,8 @@ function App() {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        height: "100vh",
+        overflow: "hidden",
         background: theme.bg,
         color: theme.text,
         display: "flex",
@@ -72,10 +73,10 @@ function App() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div style={{ flex: 1, overflowY: activeTab === "map" ? "hidden" : "auto", minHeight: 0 }}>
         {activeTab === "map" && (
-          <div>
-            <div style={{ padding: "8px 0" }}>
+          <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, overflow: "hidden" }}>
               <WorldMap
                 visitedCodes={visited}
                 onCountryClick={handleMapClick}
@@ -85,7 +86,7 @@ function App() {
                 hoverColor={theme.mapHover}
               />
             </div>
-            <div style={{ padding: "8px 12px", fontSize: 12, color: theme.hint, textAlign: "center" }}>
+            <div style={{ padding: "8px 12px", fontSize: 12, color: theme.hint, textAlign: "center", flexShrink: 0 }}>
               Tap a country to add or remove it • Pinch/scroll to zoom
             </div>
           </div>
