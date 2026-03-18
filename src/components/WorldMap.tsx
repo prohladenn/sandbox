@@ -9,6 +9,9 @@ import { NUMERIC_TO_ALPHA3 } from "../data/isoMapping";
 const GEO_URL =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
+const MAP_WIDTH = 800;
+const MAP_HEIGHT = 600;
+
 interface WorldMapProps {
   visitedCodes: Set<string>;
   onCountryClick: (alpha3: string, name: string) => void;
@@ -30,9 +33,11 @@ export function WorldMap({
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "transparent" }}>
       <ComposableMap
         projection="geoNaturalEarth1"
+        width={MAP_WIDTH}
+        height={MAP_HEIGHT}
         style={{ flex: 1, width: "100%" }}
       >
-        <ZoomableGroup zoom={1} minZoom={0.8} maxZoom={6}>
+        <ZoomableGroup zoom={1} minZoom={0.8} maxZoom={6} translateExtent={[[0, 0], [MAP_WIDTH, MAP_HEIGHT]]}>
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
