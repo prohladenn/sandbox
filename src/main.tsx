@@ -11,7 +11,7 @@ try {
     postEvent('web_app_ready')
   }
 } catch {
-  // SDK init failed inside Telegram — continue without it
+  // Not in Telegram environment or SDK init failed — continue without it
 }
 
 createRoot(document.getElementById('root')!).render(
