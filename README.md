@@ -18,7 +18,7 @@ A Telegram Mini App that lets you track countries you've visited, with an intera
 
 ## Tech Stack
 
-- **React 19** + **TypeScript** — UI framework
+- **React 18** + **TypeScript** — UI framework
 - **Vite** — Build tool
 - **@telegram-apps/sdk-react** — Telegram Mini Apps SDK
 - **react-simple-maps** — SVG world map rendering
