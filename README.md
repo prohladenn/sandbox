@@ -20,9 +20,58 @@ A Telegram Mini App that lets you track countries you've visited, with an intera
 
 - **React 18** + **TypeScript** — UI framework
 - **Vite** — Build tool
-- **@telegram-apps/sdk-react** — Telegram Mini Apps SDK
+- **[@telegram-apps/sdk-react](https://github.com/Telegram-Mini-Apps/telegram-apps)** — Telegram Mini Apps SDK
+- **[@telegram-apps/telegram-ui](https://github.com/telegram-mini-apps-dev/TelegramUI)** — Telegram-styled UI component library
+- **[reactjs-template](https://github.com/Telegram-Mini-Apps/reactjs-template)** — Reference template for React-based Telegram Mini Apps
 - **react-simple-maps** — SVG world map rendering
 - **world-atlas** (via CDN) — Country geography data (ISO 3166-1)
+
+## Libraries
+
+### [@telegram-apps/sdk-react](https://github.com/Telegram-Mini-Apps/telegram-apps)
+
+The [`telegram-apps`](https://github.com/Telegram-Mini-Apps/telegram-apps) monorepo provides the official Telegram Mini Apps SDK. This project uses the `@telegram-apps/sdk-react` package.
+
+**How it is used:**
+
+- **`isTMA()`** — Detects whether the app is running inside the Telegram client. Used in `main.tsx` to conditionally initialize the SDK only when inside Telegram, so the app also works as a standalone web page during development.
+- **`init()`** — Initializes the Telegram Mini Apps SDK, enabling access to the Telegram WebApp API (theme parameters, viewport, back button, etc.).
+
+```ts
+// src/main.tsx
+import { init, isTMA } from '@telegram-apps/sdk-react'
+
+if (isTMA()) {
+  try {
+    init()
+  } catch {
+    // SDK init failed even inside Telegram — continue without it
+  }
+}
+```
+
+After initialization, `window.Telegram.WebApp` becomes available. The `useTelegramTheme` hook (`src/hooks/useTelegramTheme.ts`) reads `themeParams` and `colorScheme` from it to adapt the app's colors to the user's current Telegram theme (light or dark).
+
+### [@telegram-apps/telegram-ui](https://github.com/telegram-mini-apps-dev/TelegramUI)
+
+[TelegramUI](https://github.com/telegram-mini-apps-dev/TelegramUI) is a React component library that provides ready-made UI components matching Telegram's native look and feel (cells, sections, modals, tab bars, etc.).
+
+**How it is used:**
+
+The current UI is built with custom inline styles that follow Telegram's design language using theme colors from the SDK. TelegramUI is the recommended library for adopting Telegram's native component patterns — its components, design tokens, and layout conventions informed the structure of this app's tab navigation, card-style panels, and theme-aware color system.
+
+### [reactjs-template](https://github.com/Telegram-Mini-Apps/reactjs-template)
+
+The [reactjs-template](https://github.com/Telegram-Mini-Apps/reactjs-template) is the official React + TypeScript + Vite starter for Telegram Mini Apps maintained by the Telegram Mini Apps team.
+
+**How it is used:**
+
+This project's setup is based on the patterns established in that template:
+
+- **SDK initialization** — The `isTMA()` + `init()` pattern in `main.tsx` mirrors the template's entry point.
+- **Vite + TypeScript** — Same build toolchain and `tsconfig` structure.
+- **ErrorBoundary** — Wraps the root component to gracefully handle runtime errors, following the template's recommended structure.
+- **GitHub Pages deployment** — The `.github/workflows/deploy.yml` workflow follows the same CI/CD approach shown in the template.
 
 ## Project Structure
 
