@@ -32,7 +32,7 @@ export function Statistics({ visited, themeColor, textColor, cardBg }: Statistic
   };
 
   return (
-    <div style={{ padding: "0 12px 12px" }}>
+    <div style={{ padding: "12px 12px 12px" }}>
       <div
         style={{
           ...cardStyle,

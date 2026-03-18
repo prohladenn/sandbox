@@ -11,6 +11,9 @@ interface CountryToastProps {
   bgColor: string;
 }
 
+// Height of the bottom tab bar (padding: 10px top + ~24px icon + 2px gap + ~14px label + 10px bottom)
+const TAB_BAR_HEIGHT = 74;
+
 export function CountryToast({
   alpha3,
   isVisited,
@@ -33,7 +36,7 @@ export function CountryToast({
     <div
       style={{
         position: "fixed",
-        bottom: 80,
+        bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT}px)`,
         left: "50%",
         transform: "translateX(-50%)",
         background: bgColor,
