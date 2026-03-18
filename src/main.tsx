@@ -5,12 +5,12 @@ import App from './App.tsx'
 import { init, isTMA } from '@telegram-apps/sdk-react'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
-if (isTMA()) {
-  try {
+try {
+  if (isTMA()) {
     init()
-  } catch {
-    // SDK init failed even inside Telegram — continue without it
   }
+} catch {
+  // Not in Telegram environment or SDK init failed — continue without it
 }
 
 createRoot(document.getElementById('root')!).render(
