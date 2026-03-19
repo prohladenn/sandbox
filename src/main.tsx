@@ -8,7 +8,6 @@ import {
   postEvent,
   mountViewport,
   expandViewport,
-  requestFullscreen,
   mountSwipeBehavior,
   disableVerticalSwipes,
   mountBackButton,
@@ -20,11 +19,10 @@ try {
     init()
     postEvent('web_app_ready')
 
-    // Expand the viewport to full height and request fullscreen if supported
+    // Expand the viewport to full height (fullsize mode)
     if (mountViewport.isAvailable()) {
       mountViewport().then(() => {
         if (expandViewport.isAvailable()) expandViewport()
-        if (requestFullscreen.isAvailable()) requestFullscreen().catch(() => {})
       }).catch(() => {})
     }
 
