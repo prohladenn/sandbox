@@ -4,18 +4,27 @@ import { WorldMap } from "./components/WorldMap";
 import { Statistics } from "./components/Statistics";
 import { CountrySearch } from "./components/CountrySearch";
 import { CountryToast } from "./components/CountryToast";
+import { CountryCard } from "./components/CountryCard";
 import { useVisitedCountries } from "./store/useVisitedCountries";
 import { useTelegramTheme } from "./hooks/useTelegramTheme";
+import { COUNTRIES } from "./data/countries";
 
 type Tab = "map" | "list" | "stats";
+
+function randomCountryCode(): string {
+  if (COUNTRIES.length === 0) return "";
+  return COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)].code;
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>("map");
   const [toast, setToast] = useState<{ alpha3: string; name: string } | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string>(() => randomCountryCode());
   const { visited, toggle, isVisited } = useVisitedCountries();
   const theme = useTelegramTheme();
 
   const handleMapClick = useCallback((alpha3: string, name: string) => {
+    setSelectedCountry(alpha3);
     setToast({ alpha3, name });
   }, []);
 
@@ -75,8 +84,8 @@ function App() {
       {/* Content */}
       <div style={{ flex: 1, overflowY: activeTab === "map" ? "hidden" : "auto", minHeight: 0, display: "flex", flexDirection: "column" }}>
         {activeTab === "map" && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div style={{ width: "100%", overflow: "hidden", flexShrink: 0 }}>
               <WorldMap
                 visitedCodes={visited}
                 onCountryClick={handleMapClick}
@@ -86,7 +95,16 @@ function App() {
                 hoverColor={theme.mapHover}
               />
             </div>
-            <div style={{ padding: "8px 12px", fontSize: 12, color: theme.hint, textAlign: "center", flexShrink: 0 }}>
+            <CountryCard
+              alpha3={selectedCountry}
+              isVisited={isVisited(selectedCountry)}
+              onToggle={toggle}
+              themeColor={theme.accent}
+              textColor={theme.text}
+              bgColor={theme.card}
+              hintColor={theme.hint}
+            />
+            <div style={{ padding: "4px 12px 8px", fontSize: 12, color: theme.hint, textAlign: "center", flexShrink: 0 }}>
               Tap a country to add or remove it • Pinch/scroll to zoom
             </div>
           </div>
