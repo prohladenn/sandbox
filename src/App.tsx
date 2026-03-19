@@ -75,21 +75,16 @@ function App() {
       {/* Content */}
       <div style={{ flex: 1, overflowY: activeTab === "map" ? "hidden" : "auto", minHeight: 0, display: "flex", flexDirection: "column" }}>
         {activeTab === "map" && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{ width: "100%", overflow: "hidden", flexShrink: 0 }}>
-              <WorldMap
-                visitedCodes={visited}
-                selectedCountry={selectedCountry}
-                onCountryClick={handleMapClick}
-                visitedColor={theme.accent}
-                defaultColor={theme.mapDefault}
-                strokeColor={theme.mapStroke}
-                selectedColor={theme.mapSelected}
-              />
-            </div>
-            <div style={{ padding: "4px 12px 8px", fontSize: 12, color: theme.hint, textAlign: "center", flexShrink: 0 }}>
-              Tap a country to add or remove it • Pinch/scroll to zoom
-            </div>
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            <WorldMap
+              visitedCodes={visited}
+              selectedCountry={selectedCountry}
+              onCountryClick={handleMapClick}
+              visitedColor={theme.accent}
+              defaultColor={theme.mapDefault}
+              strokeColor={theme.mapStroke}
+              selectedColor={theme.mapSelected}
+            />
           </div>
         )}
 
@@ -113,6 +108,13 @@ function App() {
           />
         )}
       </div>
+
+      {/* Hint text pinned just above country card */}
+      {activeTab === "map" && (
+        <div style={{ padding: "4px 12px 8px", fontSize: 12, color: theme.hint, textAlign: "center" }}>
+          Tap a country to add or remove it • Pinch/scroll to zoom
+        </div>
+      )}
 
       {/* Country card pinned above bottom tab bar */}
       {activeTab === "map" && (

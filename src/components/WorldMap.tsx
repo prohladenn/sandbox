@@ -55,7 +55,7 @@ export function WorldMap({
   }, []);
 
   return (
-    <div style={{ width: "100%", aspectRatio: `${MAP_WIDTH} / ${MAP_HEIGHT}` }}>
+    <div style={{ width: "100%", height: "100%" }}>
       <ComposableMap
         projection="geoNaturalEarth1"
         width={MAP_WIDTH}
