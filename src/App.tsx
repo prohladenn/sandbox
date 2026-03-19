@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import "./App.css";
 import { WorldMap } from "./components/WorldMap";
 import { Statistics } from "./components/Statistics";
@@ -7,6 +7,13 @@ import { CountryCard } from "./components/CountryCard";
 import { useVisitedCountries } from "./store/useVisitedCountries";
 import { useTelegramTheme } from "./hooks/useTelegramTheme";
 import { COUNTRIES } from "./data/countries";
+import {
+  showBackButton,
+  hideBackButton,
+  onBackButtonClick,
+  hapticFeedbackImpactOccurred,
+  hapticFeedbackSelectionChanged,
+} from "@telegram-apps/sdk-react";
 
 type Tab = "map" | "list" | "stats";
 
@@ -23,7 +30,34 @@ function App() {
 
   const handleMapClick = useCallback((alpha3: string) => {
     setSelectedCountry(alpha3);
+    if (hapticFeedbackImpactOccurred.isAvailable()) hapticFeedbackImpactOccurred("light");
   }, []);
+
+  const handleToggle = useCallback((alpha3: string) => {
+    toggle(alpha3);
+    if (hapticFeedbackImpactOccurred.isAvailable()) hapticFeedbackImpactOccurred("medium");
+  }, [toggle]);
+
+  const handleTabChange = useCallback((tab: Tab) => {
+    if (hapticFeedbackSelectionChanged.isAvailable()) hapticFeedbackSelectionChanged();
+    setActiveTab(tab);
+  }, []);
+
+  // Show the Telegram back button on list/stats tabs; hide it on the map tab
+  useEffect(() => {
+    if (activeTab === "map") {
+      if (hideBackButton.isAvailable()) hideBackButton();
+      return;
+    }
+    if (showBackButton.isAvailable()) showBackButton();
+    let offClick: VoidFunction | undefined;
+    if (onBackButtonClick.isAvailable()) {
+      offClick = onBackButtonClick(() => setActiveTab("map"));
+    }
+    return () => {
+      offClick?.();
+    };
+  }, [activeTab]);
 
   const tabStyle = (tab: Tab): React.CSSProperties => ({
     flex: 1,
@@ -91,7 +125,7 @@ function App() {
         {activeTab === "list" && (
           <CountrySearch
             visited={visited}
-            onToggle={toggle}
+            onToggle={handleToggle}
             themeColor={theme.accent}
             textColor={theme.text}
             cardBg={theme.card}
@@ -121,7 +155,7 @@ function App() {
         <CountryCard
           alpha3={selectedCountry}
           isVisited={isVisited(selectedCountry)}
-          onToggle={toggle}
+          onToggle={handleToggle}
           themeColor={theme.accent}
           textColor={theme.text}
           bgColor={theme.card}
@@ -138,15 +172,15 @@ function App() {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        <button style={tabStyle("map")} onClick={() => setActiveTab("map")}>
+        <button style={tabStyle("map")} onClick={() => handleTabChange("map")}>
           <span style={{ fontSize: 20 }}>🗺️</span>
           <span>Map</span>
         </button>
-        <button style={tabStyle("list")} onClick={() => setActiveTab("list")}>
+        <button style={tabStyle("list")} onClick={() => handleTabChange("list")}>
           <span style={{ fontSize: 20 }}>🔍</span>
           <span>Countries</span>
         </button>
-        <button style={tabStyle("stats")} onClick={() => setActiveTab("stats")}>
+        <button style={tabStyle("stats")} onClick={() => handleTabChange("stats")}>
           <span style={{ fontSize: 20 }}>📊</span>
           <span>Stats</span>
         </button>
