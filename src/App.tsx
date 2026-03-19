@@ -3,7 +3,6 @@ import "./App.css";
 import { WorldMap } from "./components/WorldMap";
 import { Statistics } from "./components/Statistics";
 import { CountrySearch } from "./components/CountrySearch";
-import { CountryToast } from "./components/CountryToast";
 import { CountryCard } from "./components/CountryCard";
 import { useVisitedCountries } from "./store/useVisitedCountries";
 import { useTelegramTheme } from "./hooks/useTelegramTheme";
@@ -18,21 +17,13 @@ function randomCountryCode(): string {
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>("map");
-  const [toast, setToast] = useState<{ alpha3: string; name: string } | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string>(() => randomCountryCode());
   const { visited, toggle, isVisited } = useVisitedCountries();
   const theme = useTelegramTheme();
 
-  const handleMapClick = useCallback((alpha3: string, name: string) => {
+  const handleMapClick = useCallback((alpha3: string) => {
     setSelectedCountry(alpha3);
-    setToast({ alpha3, name });
   }, []);
-
-  const handleToastToggle = useCallback(() => {
-    if (toast) toggle(toast.alpha3);
-  }, [toast, toggle]);
-
-  const handleToastClose = useCallback(() => setToast(null), []);
 
   const tabStyle = (tab: Tab): React.CSSProperties => ({
     flex: 1,
@@ -88,22 +79,14 @@ function App() {
             <div style={{ width: "100%", overflow: "hidden", flexShrink: 0 }}>
               <WorldMap
                 visitedCodes={visited}
+                selectedCountry={selectedCountry}
                 onCountryClick={handleMapClick}
                 visitedColor={theme.accent}
                 defaultColor={theme.mapDefault}
                 strokeColor={theme.mapStroke}
-                hoverColor={theme.mapHover}
+                selectedColor={theme.mapSelected}
               />
             </div>
-            <CountryCard
-              alpha3={selectedCountry}
-              isVisited={isVisited(selectedCountry)}
-              onToggle={toggle}
-              themeColor={theme.accent}
-              textColor={theme.text}
-              bgColor={theme.card}
-              hintColor={theme.hint}
-            />
             <div style={{ padding: "4px 12px 8px", fontSize: 12, color: theme.hint, textAlign: "center", flexShrink: 0 }}>
               Tap a country to add or remove it • Pinch/scroll to zoom
             </div>
@@ -131,6 +114,19 @@ function App() {
         )}
       </div>
 
+      {/* Country card pinned above bottom tab bar */}
+      {activeTab === "map" && (
+        <CountryCard
+          alpha3={selectedCountry}
+          isVisited={isVisited(selectedCountry)}
+          onToggle={toggle}
+          themeColor={theme.accent}
+          textColor={theme.text}
+          bgColor={theme.card}
+          hintColor={theme.hint}
+        />
+      )}
+
       {/* Bottom tab bar */}
       <div
         style={{
@@ -153,19 +149,6 @@ function App() {
           <span>Stats</span>
         </button>
       </div>
-
-      {/* Country toast popup on map click */}
-      {toast && (
-        <CountryToast
-          alpha3={toast.alpha3}
-          isVisited={isVisited(toast.alpha3)}
-          onClose={handleToastClose}
-          onToggle={handleToastToggle}
-          themeColor={theme.accent}
-          textColor={theme.text}
-          bgColor={theme.card}
-        />
-      )}
     </div>
   );
 }
