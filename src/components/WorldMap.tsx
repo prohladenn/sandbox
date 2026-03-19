@@ -28,20 +28,22 @@ interface MoveEvent {
 
 interface WorldMapProps {
   visitedCodes: Set<string>;
-  onCountryClick: (alpha3: string, name: string) => void;
+  selectedCountry?: string;
+  onCountryClick: (alpha3: string) => void;
   visitedColor: string;
   defaultColor: string;
   strokeColor: string;
-  hoverColor: string;
+  selectedColor: string;
 }
 
 export function WorldMap({
   visitedCodes,
+  selectedCountry,
   onCountryClick,
   visitedColor,
   defaultColor,
   strokeColor,
-  hoverColor,
+  selectedColor,
 }: WorldMapProps) {
   const [position, setPosition] = useState<MapPosition>({
     center: DEFAULT_CENTER,
@@ -66,6 +68,7 @@ export function WorldMap({
           zoom={position.zoom}
           minZoom={1}
           maxZoom={6}
+          translateExtent={[[0, 0], [MAP_WIDTH, MAP_HEIGHT]]}
           onMoveEnd={handleMoveEnd}
         >
           <Geographies geography={GEO_URL}>
@@ -73,8 +76,14 @@ export function WorldMap({
               geographies.map((geo) => {
                 const numericId = String(geo.id);
                 const alpha3 = NUMERIC_TO_ALPHA3[numericId];
-                const countryName = geo.properties.name as string;
                 const isVisited = alpha3 ? visitedCodes.has(alpha3) : false;
+                const isSelected = alpha3 ? alpha3 === selectedCountry : false;
+
+                const baseFill = isVisited
+                  ? visitedColor
+                  : isSelected
+                  ? selectedColor
+                  : defaultColor;
 
                 return (
                   <Geography
@@ -82,18 +91,18 @@ export function WorldMap({
                     geography={geo}
                     onClick={() => {
                       if (alpha3) {
-                        onCountryClick(alpha3, countryName);
+                        onCountryClick(alpha3);
                       }
                     }}
                     style={{
                       default: {
-                        fill: isVisited ? visitedColor : defaultColor,
+                        fill: baseFill,
                         stroke: strokeColor,
                         strokeWidth: 0.5,
                         outline: "none",
                       },
                       hover: {
-                        fill: isVisited ? visitedColor : hoverColor,
+                        fill: baseFill,
                         stroke: strokeColor,
                         strokeWidth: 0.5,
                         outline: "none",

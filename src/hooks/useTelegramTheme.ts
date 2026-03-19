@@ -12,6 +12,7 @@ interface TelegramTheme {
   mapDefault: string;
   mapHover: string;
   mapStroke: string;
+  mapSelected: string;
 }
 
 function getTelegramWebApp() {
@@ -50,6 +51,7 @@ export function useTelegramTheme(): TelegramTheme {
         mapDefault: "#3a3a3c",
         mapHover: "#48484a",
         mapStroke: "#1c1c1e",
+        mapSelected: "#4a7bb5",
       };
     }
 
@@ -65,6 +67,7 @@ export function useTelegramTheme(): TelegramTheme {
       mapDefault: "#d1d1d6",
       mapHover: "#c7c7cc",
       mapStroke: "#f2f2f7",
+      mapSelected: "#a8c4e0",
     };
   }, []);
 }
