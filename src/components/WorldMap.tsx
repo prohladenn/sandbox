@@ -53,13 +53,13 @@ export function WorldMap({
   }, []);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div style={{ width: "100%", aspectRatio: `${MAP_WIDTH} / ${MAP_HEIGHT}` }}>
       <ComposableMap
         projection="geoNaturalEarth1"
         width={MAP_WIDTH}
         height={MAP_HEIGHT}
-        preserveAspectRatio="xMidYMid slice"
-        style={{ flex: 1, width: "100%", height: "100%" }}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: "100%", height: "100%", display: "block" }}
       >
         <ZoomableGroup
           center={position.center}
