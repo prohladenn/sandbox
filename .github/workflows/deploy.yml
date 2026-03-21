@@ -8,10 +8,14 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: pages-main
   cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-and-deploy:
@@ -38,3 +42,25 @@ jobs:
           folder: dist
           branch: gh-pages
           clean-exclude: pr-preview
+
+      - name: Configure GitHub Pages source
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const params = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              build_type: 'legacy',
+              source: { branch: 'gh-pages', path: '/' }
+            };
+            try {
+              await github.rest.repos.updateInformationAboutPagesSite(params);
+              console.log('GitHub Pages configured to deploy from gh-pages branch');
+            } catch (e) {
+              if (e.status === 409) {
+                await github.rest.repos.createPagesSite(params);
+                console.log('GitHub Pages enabled and configured to deploy from gh-pages branch');
+              } else {
+                throw e;
+              }
+            }
