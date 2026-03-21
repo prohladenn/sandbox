@@ -5,6 +5,7 @@ import type { Country } from "../data/countries";
 interface CountrySearchProps {
   visited: Set<string>;
   onToggle: (code: string) => void;
+  onMarkVisited: (code: string) => void;
   themeColor: string;
   textColor: string;
   cardBg: string;
@@ -14,6 +15,7 @@ interface CountrySearchProps {
 export function CountrySearch({
   visited,
   onToggle,
+  onMarkVisited,
   themeColor,
   textColor,
   cardBg,
@@ -64,7 +66,7 @@ export function CountrySearch({
     return (
       <div
         key={country.code}
-        onClick={() => onToggle(country.code)}
+        onClick={() => (isVisited ? onToggle(country.code) : onMarkVisited(country.code))}
         style={{
           display: "flex",
           alignItems: "center",
