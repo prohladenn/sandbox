@@ -4,6 +4,7 @@ import { WorldMap } from "./components/WorldMap";
 import { Statistics } from "./components/Statistics";
 import { CountrySearch } from "./components/CountrySearch";
 import { CountryCard } from "./components/CountryCard";
+import { Timeline } from "./components/Timeline";
 import { useVisitedCountries } from "./store/useVisitedCountries";
 import { useTelegramTheme } from "./hooks/useTelegramTheme";
 import { COUNTRIES } from "./data/countries";
@@ -21,7 +22,7 @@ import {
   viewportContentSafeAreaInsetBottom,
 } from "@telegram-apps/sdk-react";
 
-type Tab = "map" | "list" | "stats";
+type Tab = "map" | "list" | "stats" | "timeline";
 
 function randomCountryCode(): string {
   if (COUNTRIES.length === 0) return "";
@@ -31,7 +32,7 @@ function randomCountryCode(): string {
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>("map");
   const [selectedCountry, setSelectedCountry] = useState<string>(() => randomCountryCode());
-  const { visited, toggle, isVisited } = useVisitedCountries();
+  const { visited, visitedDates, toggle, isVisited } = useVisitedCountries();
   const theme = useTelegramTheme();
 
   const vpMounted = useSignal(isViewportMounted);
@@ -159,6 +160,17 @@ function App() {
             cardBg={theme.card}
           />
         )}
+
+        {activeTab === "timeline" && (
+          <Timeline
+            visitedDates={visitedDates}
+            onUnmark={handleToggle}
+            themeColor={theme.accent}
+            textColor={theme.text}
+            cardBg={theme.card}
+            hintColor={theme.hint}
+          />
+        )}
       </div>
 
       {/* Hint text pinned just above country card */}
@@ -201,6 +213,10 @@ function App() {
         <button style={tabStyle("stats")} onClick={() => handleTabChange("stats")}>
           <span style={{ fontSize: 20 }}>📊</span>
           <span>Stats</span>
+        </button>
+        <button style={tabStyle("timeline")} onClick={() => handleTabChange("timeline")}>
+          <span style={{ fontSize: 20 }}>🗓️</span>
+          <span>Timeline</span>
         </button>
       </div>
     </div>

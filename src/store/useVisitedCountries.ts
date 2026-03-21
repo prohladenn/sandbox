@@ -1,51 +1,67 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
-const STORAGE_KEY = "visited_countries";
+const STORAGE_KEY_V2 = "visited_countries_v2";
+const STORAGE_KEY_LEGACY = "visited_countries";
 
-function loadVisited(): Set<string> {
+// v2 format: Record<alpha3, unix timestamp ms>
+type VisitedDates = Record<string, number>;
+
+function loadVisitedDates(): VisitedDates {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY_V2);
     if (raw) {
-      const arr = JSON.parse(raw) as string[];
-      return new Set(arr);
+      return JSON.parse(raw) as VisitedDates;
+    }
+    // Migrate from legacy format (plain string[]) — timestamp 0 represents an
+    // unknown/legacy visit date.
+    const legacy = localStorage.getItem(STORAGE_KEY_LEGACY);
+    if (legacy) {
+      const arr = JSON.parse(legacy) as string[];
+      const migrated: VisitedDates = {};
+      for (const code of arr) {
+        migrated[code] = 0;
+      }
+      return migrated;
     }
   } catch {
     // ignore
   }
-  return new Set();
+  return {};
 }
 
-function saveVisited(visited: Set<string>): void {
+function saveVisitedDates(dates: VisitedDates): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...visited]));
+    localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(dates));
   } catch {
     // ignore
   }
 }
 
 export function useVisitedCountries() {
-  const [visited, setVisited] = useState<Set<string>>(() => loadVisited());
+  const [visitedDates, setVisitedDates] = useState<VisitedDates>(() => loadVisitedDates());
+
+  const visited = useMemo(() => new Set(Object.keys(visitedDates)), [visitedDates]);
 
   useEffect(() => {
-    saveVisited(visited);
-  }, [visited]);
+    saveVisitedDates(visitedDates);
+  }, [visitedDates]);
 
   const toggle = useCallback((code: string) => {
-    setVisited((prev) => {
-      const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
+    setVisitedDates((prev) => {
+      const next = { ...prev };
+      if (code in next) {
+        delete next[code];
       } else {
-        next.add(code);
+        next[code] = Date.now();
       }
       return next;
     });
   }, []);
 
   const isVisited = useCallback(
-    (code: string) => visited.has(code),
-    [visited]
+    (code: string) => code in visitedDates,
+    [visitedDates]
   );
 
-  return { visited, toggle, isVisited };
+  return { visited, visitedDates, toggle, isVisited };
 }
