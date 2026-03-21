@@ -1,13 +1,14 @@
 name: PR Preview
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened, closed]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   pages: write
+  id-token: write
+  pull-requests: write
 
 concurrency:
   group: pr-preview-${{ github.event.number }}
@@ -20,6 +21,9 @@ jobs:
   deploy-preview:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,40 +37,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with PR base path
+      - name: Build main app
         run: npm run build
+
+      - name: Build PR preview
+        run: npx vite build --outDir /tmp/pr-build
         env:
           VITE_BASE_PATH: /sandbox/pr-preview/pr-${{ github.event.number }}/
 
-      - name: Deploy preview to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist
-          branch: gh-pages
-          target-folder: pr-preview/pr-${{ github.event.number }}
-          clean: true
+      - name: Add PR preview to dist
+        run: |
+          mkdir -p dist/pr-preview/pr-${{ github.event.number }}
+          cp -r /tmp/pr-build/. dist/pr-preview/pr-${{ github.event.number }}/
 
-      - name: Configure GitHub Pages source
-        uses: actions/github-script@v7
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          script: |
-            const params = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              build_type: 'legacy',
-              source: { branch: 'gh-pages', path: '/' }
-            };
-            try {
-              await github.rest.repos.updateInformationAboutPagesSite(params);
-              console.log('GitHub Pages configured to deploy from gh-pages branch');
-            } catch (e) {
-              if (e.status === 409) {
-                await github.rest.repos.createPagesSite(params);
-                console.log('GitHub Pages enabled and configured to deploy from gh-pages branch');
-              } else {
-                throw e;
-              }
-            }
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Comment preview URL on PR
         uses: actions/github-script@v7
@@ -91,20 +82,30 @@ jobs:
   cleanup-preview:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
-      - name: Checkout gh-pages branch
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
+          ref: ${{ github.event.pull_request.base.ref }}
 
-      - name: Remove preview directory
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -d "pr-preview/pr-${{ github.event.number }}" ]; then
-            git rm -rf "pr-preview/pr-${{ github.event.number }}"
-            git commit -m "chore: remove PR preview for #${{ github.event.number }}"
-            git push
-          else
-            echo "Preview directory not found, nothing to clean up."
-          fi
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

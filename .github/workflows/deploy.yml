@@ -7,22 +7,28 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
+  id-token: write
 
 concurrency:
-  group: pages-main
+  group: pages
   cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,31 +42,18 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: dist
-          branch: gh-pages
-          clean-exclude: pr-preview
+          path: dist
 
-      - name: Configure GitHub Pages source
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const params = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              build_type: 'legacy',
-              source: { branch: 'gh-pages', path: '/' }
-            };
-            try {
-              await github.rest.repos.updateInformationAboutPagesSite(params);
-              console.log('GitHub Pages configured to deploy from gh-pages branch');
-            } catch (e) {
-              if (e.status === 409) {
-                await github.rest.repos.createPagesSite(params);
-                console.log('GitHub Pages enabled and configured to deploy from gh-pages branch');
-              } else {
-                throw e;
-              }
-            }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
