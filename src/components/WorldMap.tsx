@@ -67,7 +67,7 @@ export function WorldMap({
           center={position.center}
           zoom={position.zoom}
           minZoom={1}
-          maxZoom={6}
+          maxZoom={12}
           translateExtent={[[0, 0], [MAP_WIDTH, MAP_HEIGHT]]}
           onMoveEnd={handleMoveEnd}
         >
@@ -100,13 +100,14 @@ export function WorldMap({
                         stroke: strokeColor,
                         strokeWidth: 0.5,
                         outline: "none",
+                        cursor: alpha3 ? "pointer" : "default",
                       },
                       hover: {
                         fill: baseFill,
                         stroke: strokeColor,
                         strokeWidth: 0.5,
                         outline: "none",
-                        cursor: "pointer",
+                        cursor: alpha3 ? "pointer" : "default",
                         opacity: 0.85,
                       },
                       pressed: {

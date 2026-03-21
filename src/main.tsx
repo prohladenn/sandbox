@@ -5,6 +5,7 @@ import {
   isTMA,
   mountBackButton,
   mountSwipeBehavior,
+  mountThemeParamsSync,
   mountViewport,
   postEvent,
 } from "@telegram-apps/sdk-react";
@@ -18,6 +19,11 @@ try {
   if (isTMA()) {
     init();
     postEvent("web_app_ready");
+
+    // Mount theme params so theme signals are populated
+    if (mountThemeParamsSync.isAvailable()) {
+      mountThemeParamsSync();
+    }
 
     // Expand the viewport to full height (fullsize mode)
     if (mountViewport.isAvailable()) {

@@ -1,4 +1,9 @@
-import { useMemo } from "react";
+import { useSignal } from "@telegram-apps/sdk-react";
+import {
+  isThemeParamsDark,
+  isThemeParamsMounted,
+  themeParamsState,
+} from "@telegram-apps/sdk-react";
 
 interface TelegramTheme {
   bg: string;
@@ -15,59 +20,52 @@ interface TelegramTheme {
   mapSelected: string;
 }
 
-function getTelegramWebApp() {
-  return (window as unknown as { Telegram?: { WebApp?: Record<string, unknown> } }).Telegram?.WebApp;
-}
-
-function getTgColor(key: string, fallback: string): string {
-  const tg = getTelegramWebApp();
-  if (!tg) return fallback;
-  const themeParams = tg.themeParams as Record<string, string> | undefined;
-  return themeParams?.[key] ?? fallback;
-}
-
-function isDark(): boolean {
-  const tg = getTelegramWebApp();
-  if (!tg) {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  return (tg.colorScheme as string) === "dark";
-}
-
 export function useTelegramTheme(): TelegramTheme {
-  return useMemo(() => {
-    const dark = isDark();
+  const mounted = useSignal(isThemeParamsMounted);
+  const tgDark = useSignal(isThemeParamsDark);
+  const state = useSignal(themeParamsState);
 
-    if (dark) {
-      return {
-        bg: getTgColor("bg_color", "#1c1c1e"),
-        text: getTgColor("text_color", "#ffffff"),
-        hint: getTgColor("hint_color", "#8e8e93"),
-        accent: getTgColor("button_color", "#2196f3"),
-        card: getTgColor("secondary_bg_color", "#2c2c2e"),
-        header: getTgColor("header_bg_color", "#1c1c1e"),
-        separator: getTgColor("section_separator_color", "#38383a"),
-        input: getTgColor("secondary_bg_color", "#2c2c2e"),
-        mapDefault: "#3a3a3c",
-        mapHover: "#48484a",
-        mapStroke: "#1c1c1e",
-        mapSelected: "#4a7bb5",
-      };
-    }
+  const dark = mounted
+    ? tgDark
+    : window.matchMedia("(prefers-color-scheme: dark)").matches;
 
+  const bg = state["bg_color"];
+  const text = state["text_color"];
+  const hint = state["hint_color"];
+  const accent = state["button_color"];
+  const secondaryBg = state["secondary_bg_color"];
+  const headerBg = state["header_bg_color"];
+  const separator = state["section_separator_color"];
+
+  if (dark) {
     return {
-      bg: getTgColor("bg_color", "#f2f2f7"),
-      text: getTgColor("text_color", "#000000"),
-      hint: getTgColor("hint_color", "#8e8e93"),
-      accent: getTgColor("button_color", "#007aff"),
-      card: getTgColor("secondary_bg_color", "#ffffff"),
-      header: getTgColor("header_bg_color", "#ffffff"),
-      separator: getTgColor("section_separator_color", "#c6c6c8"),
-      input: getTgColor("secondary_bg_color", "#e5e5ea"),
-      mapDefault: "#d1d1d6",
-      mapHover: "#c7c7cc",
-      mapStroke: "#f2f2f7",
-      mapSelected: "#a8c4e0",
+      bg: bg ?? "#1c1c1e",
+      text: text ?? "#ffffff",
+      hint: hint ?? "#8e8e93",
+      accent: accent ?? "#2196f3",
+      card: secondaryBg ?? "#2c2c2e",
+      header: headerBg ?? "#1c1c1e",
+      separator: separator ?? "#38383a",
+      input: secondaryBg ?? "#2c2c2e",
+      mapDefault: "#3a3a3c",
+      mapHover: "#48484a",
+      mapStroke: bg ?? "#1c1c1e",
+      mapSelected: "#4a7bb5",
     };
-  }, []);
+  }
+
+  return {
+    bg: bg ?? "#f2f2f7",
+    text: text ?? "#000000",
+    hint: hint ?? "#8e8e93",
+    accent: accent ?? "#007aff",
+    card: secondaryBg ?? "#ffffff",
+    header: headerBg ?? "#ffffff",
+    separator: separator ?? "#c6c6c8",
+    input: secondaryBg ?? "#e5e5ea",
+    mapDefault: "#d1d1d6",
+    mapHover: "#c7c7cc",
+    mapStroke: bg ?? "#f2f2f7",
+    mapSelected: "#a8c4e0",
+  };
 }

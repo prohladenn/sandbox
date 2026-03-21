@@ -13,6 +13,12 @@ import {
   onBackButtonClick,
   hapticFeedbackImpactOccurred,
   hapticFeedbackSelectionChanged,
+  useSignal,
+  isViewportMounted,
+  viewportSafeAreaInsetTop,
+  viewportSafeAreaInsetBottom,
+  viewportContentSafeAreaInsetTop,
+  viewportContentSafeAreaInsetBottom,
 } from "@telegram-apps/sdk-react";
 
 type Tab = "map" | "list" | "stats";
@@ -27,6 +33,15 @@ function App() {
   const [selectedCountry, setSelectedCountry] = useState<string>(() => randomCountryCode());
   const { visited, toggle, isVisited } = useVisitedCountries();
   const theme = useTelegramTheme();
+
+  const vpMounted = useSignal(isViewportMounted);
+  const safeTop = useSignal(viewportSafeAreaInsetTop);
+  const safeBottom = useSignal(viewportSafeAreaInsetBottom);
+  const contentSafeTop = useSignal(viewportContentSafeAreaInsetTop);
+  const contentSafeBottom = useSignal(viewportContentSafeAreaInsetBottom);
+
+  const headerPaddingTop = vpMounted ? `${contentSafeTop + safeTop + 16}px` : "16px";
+  const tabBarPaddingBottom = vpMounted ? `${contentSafeBottom + safeBottom}px` : "env(safe-area-inset-bottom, 0px)";
 
   const handleMapClick = useCallback((alpha3: string) => {
     setSelectedCountry(alpha3);
@@ -93,7 +108,10 @@ function App() {
       {/* Header */}
       <div
         style={{
-          padding: "16px 16px 8px",
+          paddingTop: headerPaddingTop,
+          paddingRight: "16px",
+          paddingBottom: "8px",
+          paddingLeft: "16px",
           background: theme.header,
           borderBottom: `1px solid ${theme.separator}`,
         }}
@@ -169,7 +187,7 @@ function App() {
           display: "flex",
           background: theme.header,
           borderTop: `1px solid ${theme.separator}`,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingBottom: tabBarPaddingBottom,
         }}
       >
         <button style={tabStyle("map")} onClick={() => handleTabChange("map")}>
