@@ -74,7 +74,7 @@ export function WorldMap({
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const numericId = String(geo.id);
+                const numericId = String(parseInt(String(geo.id), 10));
                 const alpha3 = NUMERIC_TO_ALPHA3[numericId];
                 const isVisited = alpha3 ? visitedCodes.has(alpha3) : false;
                 const isSelected = alpha3 ? alpha3 === selectedCountry : false;
