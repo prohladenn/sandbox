@@ -5,6 +5,7 @@ import { Statistics } from "./components/Statistics";
 import { CountrySearch } from "./components/CountrySearch";
 import { CountryCard } from "./components/CountryCard";
 import { Timeline } from "./components/Timeline";
+import { VisitDateModal } from "./components/VisitDateModal";
 import { useVisitedCountries } from "./store/useVisitedCountries";
 import { useTelegramTheme } from "./hooks/useTelegramTheme";
 import { COUNTRIES } from "./data/countries";
@@ -32,7 +33,8 @@ function randomCountryCode(): string {
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>("map");
   const [selectedCountry, setSelectedCountry] = useState<string>(() => randomCountryCode());
-  const { visited, visitedDates, toggle, isVisited } = useVisitedCountries();
+  const [visitModalCountry, setVisitModalCountry] = useState<string | null>(null);
+  const { visited, visitedData, markVisited, toggle, isVisited } = useVisitedCountries();
   const theme = useTelegramTheme();
 
   const vpMounted = useSignal(isViewportMounted);
@@ -53,6 +55,22 @@ function App() {
     toggle(alpha3);
     if (hapticFeedbackImpactOccurred.isAvailable()) hapticFeedbackImpactOccurred("medium");
   }, [toggle]);
+
+  const handleMarkVisited = useCallback((alpha3: string) => {
+    setVisitModalCountry(alpha3);
+  }, []);
+
+  const handleModalConfirm = useCallback((startDate: string, endDate?: string) => {
+    if (visitModalCountry) {
+      markVisited(visitModalCountry, startDate, endDate);
+      if (hapticFeedbackImpactOccurred.isAvailable()) hapticFeedbackImpactOccurred("medium");
+    }
+    setVisitModalCountry(null);
+  }, [visitModalCountry, markVisited]);
+
+  const handleModalCancel = useCallback(() => {
+    setVisitModalCountry(null);
+  }, []);
 
   const handleTabChange = useCallback((tab: Tab) => {
     if (hapticFeedbackSelectionChanged.isAvailable()) hapticFeedbackSelectionChanged();
@@ -145,6 +163,7 @@ function App() {
           <CountrySearch
             visited={visited}
             onToggle={handleToggle}
+            onMarkVisited={handleMarkVisited}
             themeColor={theme.accent}
             textColor={theme.text}
             cardBg={theme.card}
@@ -155,6 +174,7 @@ function App() {
         {activeTab === "stats" && (
           <Statistics
             visited={visited}
+            visitedData={visitedData}
             themeColor={theme.accent}
             textColor={theme.text}
             cardBg={theme.card}
@@ -163,8 +183,9 @@ function App() {
 
         {activeTab === "timeline" && (
           <Timeline
-            visitedDates={visitedDates}
+            visitedData={visitedData}
             onUnmark={handleToggle}
+            onEditDates={handleMarkVisited}
             themeColor={theme.accent}
             textColor={theme.text}
             cardBg={theme.card}
@@ -185,7 +206,9 @@ function App() {
         <CountryCard
           alpha3={selectedCountry}
           isVisited={isVisited(selectedCountry)}
+          visitEntry={visitedData[selectedCountry]}
           onToggle={handleToggle}
+          onMarkVisited={handleMarkVisited}
           themeColor={theme.accent}
           textColor={theme.text}
           bgColor={theme.card}
@@ -219,6 +242,22 @@ function App() {
           <span>Timeline</span>
         </button>
       </div>
+
+      {/* Visit date modal */}
+      {visitModalCountry && (
+        <VisitDateModal
+          alpha3={visitModalCountry}
+          existingEntry={visitedData[visitModalCountry]}
+          onConfirm={handleModalConfirm}
+          onCancel={handleModalCancel}
+          themeColor={theme.accent}
+          textColor={theme.text}
+          bgColor={theme.bg}
+          cardBg={theme.card}
+          hintColor={theme.hint}
+          inputBg={theme.input}
+        />
+      )}
     </div>
   );
 }

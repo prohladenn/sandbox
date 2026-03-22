@@ -1,14 +1,16 @@
 import { useMemo } from "react";
 import { COUNTRIES, REGIONS, TOTAL_COUNTRIES } from "../data/countries";
+import type { VisitedData } from "../store/useVisitedCountries";
 
 interface StatisticsProps {
   visited: Set<string>;
+  visitedData: VisitedData;
   themeColor: string;
   textColor: string;
   cardBg: string;
 }
 
-export function Statistics({ visited, themeColor, textColor, cardBg }: StatisticsProps) {
+export function Statistics({ visited, visitedData, themeColor, textColor, cardBg }: StatisticsProps) {
   const stats = useMemo(() => {
     const visitedList = COUNTRIES.filter((c) => visited.has(c.code));
     const byRegion = REGIONS.map((region) => {
@@ -17,12 +19,24 @@ export function Statistics({ visited, themeColor, textColor, cardBg }: Statistic
       return { region, count, total };
     }).filter((r) => r.total > 0);
 
+    // Yearly breakdown: count countries by startDate year
+    const yearMap = new Map<string, number>();
+    for (const entry of Object.values(visitedData)) {
+      const year = entry.startDate ? entry.startDate.slice(0, 4) : null;
+      if (!year) continue;
+      yearMap.set(year, (yearMap.get(year) ?? 0) + 1);
+    }
+    const byYear = [...yearMap.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([year, count]) => ({ year, count }));
+
     return {
       total: visited.size,
       percentage: ((visited.size / TOTAL_COUNTRIES) * 100).toFixed(1),
       byRegion,
+      byYear,
     };
-  }, [visited]);
+  }, [visited, visitedData]);
 
   const cardStyle: React.CSSProperties = {
     background: cardBg,
@@ -129,6 +143,39 @@ export function Statistics({ visited, themeColor, textColor, cardBg }: Statistic
           </div>
         </div>
       ))}
+
+      {stats.byYear.length > 0 && (
+        <>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: textColor,
+              marginBottom: 8,
+              marginTop: 16,
+              opacity: 0.7,
+            }}
+          >
+            BY YEAR
+          </div>
+          {stats.byYear.map(({ year, count }) => (
+            <div key={year} style={{ ...cardStyle, marginBottom: 6 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ fontSize: 14, color: textColor }}>{year}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: themeColor }}>
+                  {count} {count === 1 ? "country" : "countries"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
