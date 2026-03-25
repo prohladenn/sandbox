@@ -77,6 +77,11 @@ function App() {
     setActiveTab(tab);
   }, []);
 
+  const handleViewOnMap = useCallback((alpha3: string) => {
+    setSelectedCountry(alpha3);
+    handleTabChange("map");
+  }, [handleTabChange]);
+
   // Show the Telegram back button on list/stats tabs; hide it on the map tab
   useEffect(() => {
     if (activeTab === "map") {
@@ -164,6 +169,7 @@ function App() {
             visited={visited}
             onToggle={handleToggle}
             onMarkVisited={handleMarkVisited}
+            onViewOnMap={handleViewOnMap}
             themeColor={theme.accent}
             textColor={theme.text}
             cardBg={theme.card}

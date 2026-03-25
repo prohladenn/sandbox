@@ -6,6 +6,7 @@ interface CountrySearchProps {
   visited: Set<string>;
   onToggle: (code: string) => void;
   onMarkVisited: (code: string) => void;
+  onViewOnMap?: (code: string) => void;
   themeColor: string;
   textColor: string;
   cardBg: string;
@@ -16,6 +17,7 @@ export function CountrySearch({
   visited,
   onToggle,
   onMarkVisited,
+  onViewOnMap,
   themeColor,
   textColor,
   cardBg,
@@ -88,6 +90,27 @@ export function CountrySearch({
             {country.region}
           </div>
         </div>
+        {onViewOnMap && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewOnMap(country.code);
+            }}
+            aria-label={`View ${country.name} on map`}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px 6px",
+              marginRight: 4,
+              fontSize: 16,
+              lineHeight: 1,
+              opacity: 0.5,
+            }}
+          >
+            🗺️
+          </button>
+        )}
         <div
           style={{
             width: 24,
